@@ -1,0 +1,14 @@
+<x-layout title="{{ $employee->name }}">
+    <div class="flex items-center justify-between"><div><h1 class="text-2xl font-bold">{{ $employee->name }}</h1><p class="text-sm text-slate-500">{{ $employee->employee_code }} · {{ $employee->phone }} · {{ $employee->email }}</p></div><a class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold dark:border-slate-700" href="{{ route('employees.edit', $employee) }}">Edit</a></div>
+    <div class="mt-6 grid gap-4 sm:grid-cols-4">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"><p class="text-sm text-slate-500">Submissions</p><p class="text-2xl font-bold">{{ $employee->submissions->count() }}</p></div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"><p class="text-sm text-slate-500">Suspicious</p><p class="text-2xl font-bold">{{ $employee->suspiciousLogs->count() }}</p></div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"><p class="text-sm text-slate-500">Assigned sites</p><p class="text-2xl font-bold">{{ $employee->sites->count() }}</p></div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"><p class="text-sm text-slate-500">Last seen</p><p class="text-sm font-semibold">{{ $employee->last_seen?->diffForHumans() ?? 'Never' }}</p></div>
+    </div>
+    <div class="mt-6 grid gap-6 lg:grid-cols-2">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"><h2 class="font-semibold">Visit timeline</h2>@foreach($timeline as $submission)<a href="{{ route('submissions.show', $submission) }}" class="mt-3 block rounded-md border border-slate-200 p-3 text-sm dark:border-slate-800">{{ $submission->site?->site_name }} · {{ $submission->distance_from_site }}m · {{ $submission->risk_level }} · {{ $submission->created_at->toDayDateTimeString() }}</a>@endforeach</div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"><h2 class="font-semibold">GPS route history</h2><div id="employee-route-map" class="mt-4 h-96 rounded-md"></div></div>
+    </div>
+    @push('scripts')<script>window.addEventListener('load',()=>{const pts=@json($locations);const center=pts[0]?[Number(pts[0].latitude),Number(pts[0].longitude)]:[28.4595,77.0266];const map=L.map('employee-route-map').setView(center,12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);const route=pts.map(p=>[Number(p.latitude),Number(p.longitude)]);if(route.length){L.polyline(route,{color:'#2563eb'}).addTo(map);route.forEach(p=>L.circleMarker(p,{radius:5}).addTo(map));}});</script>@endpush
+</x-layout>
